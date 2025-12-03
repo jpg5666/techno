@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teman Bicara - Counseling & Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="app-container">
+        
+        <div id="auth-view">
+            <div class="auth-card text-center">
+                <div style="margin-bottom: 20px;">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <h1 class="auth-title" id="auth-title">Selamat Datang</h1>
+                <p class="auth-subtitle" id="auth-subtitle">Login untuk melanjutkan</p>
+
+                <form id="auth-form" onsubmit="handleAuth(event)">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="Nama Pengguna" required>
+                        <div class="error-message" id="username-error"></div>
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="Kata Sandi" required>
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+                    <div class="input-group hidden" id="confirm-pass-group">
+                        <input type="password" id="confirm-password" placeholder="Konfirmasi Kata Sandi">
+                        <div class="error-message" id="confirm-error"></div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="auth-btn">Masuk</button>
+                </form>
+
+                <div class="auth-switch">
+                    <p id="switch-text">Belum punya akun? <span onclick="toggleAuthMode()">Daftar</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="main-view" class="hidden">
+            
+            <nav class="bottom-nav" id="bottom-nav">
+                <button class="nav-item active" onclick="navigateTo('home')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" onclick="navigateTo('chats')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Chats</span>
+                </button>
+                <button class="nav-item" onclick="navigateTo('profile')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span>Profile</span>
+                </button>
+            </nav>
+
+            <div class="main-wrapper">
+                
+                <header>
+                    <div class="header-top">
+                        <div class="flex items-center">
+                            <button id="back-btn" class="back-btn hidden" onclick="goBack()">&#8592;</button>
+                            <h2 id="page-title" style="font-size: 1.2rem; font-weight:700;">Teman Bicara</h2>
+                        </div>
+                        <div class="credit-badge" onclick="navigateTo('topup')">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 6v12M6 12h12"></path>
+                            </svg>
+                            <span id="credit-display">0 Cr</span>
+                        </div>
+                    </div>
+                </header>
+
+                <main id="content-area">
+                    </main>
+            </div>
+
+        </div>
+
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal-box">
+                <h2 class="modal-title" id="modal-title">Konfirmasi</h2>
+                <p class="modal-message" id="modal-message">Apakah Anda yakin?</p>
+                <div class="modal-buttons">
+                    <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Batal</button>
+                    <button class="modal-btn modal-btn-primary" id="modal-confirm-btn" onclick="confirmModal()">Ya</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
