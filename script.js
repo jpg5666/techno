@@ -294,23 +294,119 @@ function renderProfile(container) {
     container.innerHTML = `
         <div class="text-center mt-4">
             <img src="https://ui-avatars.com/api/?name=${state.user.name}&background=random" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 10px;">
-            <h2>${state.user.name}</h2>
+            <h2 id="profile-name">${state.user.name}</h2>
             <p style="color: var(--text-light);">Anggota sejak 2023</p>
         </div>
-        <div style="margin-top: 30px;">
-                <div class="mitra-card">
+
+        <div style="margin-top: 20px; background: #fff; padding: 16px; border-radius:12px;">
+            <h3 style="margin-bottom:8px;">Ubah Nama</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input id="new-username" type="text" placeholder="Nama baru" style="flex:1; padding:8px; border-radius:8px; border:1px solid #e5e7eb;">
+                <button class="btn-primary" style="padding:8px 12px; width:auto;" onclick="renameUser()">Simpan</button>
+            </div>
+            <div id="rename-msg" style="margin-top:8px; color:#b91c1c; display:none;"></div>
+        </div>
+
+        <div style="margin-top: 16px; background: #fff; padding: 16px; border-radius:12px;">
+            <h3 style="margin-bottom:8px;">Ganti Kata Sandi</h3>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <input id="current-password" type="password" placeholder="Kata sandi saat ini" style="padding:8px; border-radius:8px; border:1px solid #e5e7eb;">
+                <input id="new-password" type="password" placeholder="Kata sandi baru" style="padding:8px; border-radius:8px; border:1px solid #e5e7eb;">
+                <input id="confirm-password" type="password" placeholder="Konfirmasi kata sandi baru" style="padding:8px; border-radius:8px; border:1px solid #e5e7eb;">
+                <div style="display:flex; gap:8px;">
+                    <button class="btn-primary" style="padding:8px 12px;" onclick="changePassword()">Ubah</button>
+                    <button class="modal-btn modal-btn-secondary" style="padding:8px 12px;" onclick="clearProfileInputs()">Reset</button>
+                </div>
+                <div id="password-msg" style="margin-top:6px; color:#b91c1c; display:none;"></div>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px; display:flex; gap:12px;">
+            <div class="mitra-card" style="flex:1; cursor:default;">
                 <div>
                     <h3>Pengaturan</h3>
-                    <p>Notifikasi, Kata Sandi, dll</p>
+                    <p>Ubah nama & kata sandi akun Anda di sini.</p>
                 </div>
             </div>
-            <div class="mitra-card" onclick="logout()">
+            <div class="mitra-card" onclick="logout()" style="background:#fff;">
                 <div style="color: red;">
                     <h3>Keluar</h3>
                 </div>
             </div>
         </div>
     `;
+}
+
+function clearProfileInputs() {
+    const ids = ['current-password','new-password','confirm-password','new-username'];
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const msgs = ['rename-msg','password-msg'];
+    msgs.forEach(id => { const el = document.getElementById(id); if (el) { el.style.display='none'; el.innerText=''; } });
+}
+
+function renameUser() {
+    const input = document.getElementById('new-username');
+    const msg = document.getElementById('rename-msg');
+    if (!input) return;
+    const newName = input.value.trim();
+    if (!newName) {
+        msg.style.display = 'block'; msg.innerText = 'Nama tidak boleh kosong.'; return;
+    }
+    if (!state.user) { msg.style.display='block'; msg.innerText='Silakan masuk terlebih dahulu.'; return; }
+    if (newName === state.user.name) { msg.style.display='block'; msg.innerText='Nama sama seperti sebelumnya.'; return; }
+
+    // cek apakah username sudah dipakai
+    if (localStorage.getItem('user_' + newName)) {
+        msg.style.display='block'; msg.innerText='Nama pengguna sudah digunakan.'; return;
+    }
+
+    const oldKey = 'user_' + state.user.name;
+    const data = JSON.parse(localStorage.getItem(oldKey)) || { password: '', credits: state.credits };
+
+    try {
+        localStorage.setItem('user_' + newName, JSON.stringify(data));
+        localStorage.removeItem(oldKey);
+        localStorage.setItem('current_user', newName);
+        state.user.name = newName;
+        // update UI
+        const nameEl = document.getElementById('profile-name'); if (nameEl) nameEl.innerText = newName;
+        msg.style.color = '#166534'; msg.style.display = 'block'; msg.innerText = 'Nama berhasil diubah.';
+        setTimeout(() => { if (msg) msg.style.display='none'; }, 2500);
+    } catch (e) {
+        msg.style.display='block'; msg.innerText='Terjadi kesalahan saat menyimpan.';
+    }
+}
+
+function changePassword() {
+    const cur = document.getElementById('current-password');
+    const nw = document.getElementById('new-password');
+    const cf = document.getElementById('confirm-password');
+    const msg = document.getElementById('password-msg');
+    if (!cur || !nw || !cf) return;
+    const curVal = cur.value;
+    const newVal = nw.value;
+    const confVal = cf.value;
+    if (!state.user) { msg.style.display='block'; msg.innerText='Silakan masuk terlebih dahulu.'; return; }
+
+    const key = 'user_' + state.user.name;
+    const userData = JSON.parse(localStorage.getItem(key) || '{}');
+    if (!userData.password) userData.password = '';
+
+    if (userData.password !== curVal) {
+        msg.style.display='block'; msg.innerText='Kata sandi saat ini salah.'; return;
+    }
+    if (newVal.length < 4) { msg.style.display='block'; msg.innerText='Kata sandi baru minimal 4 karakter.'; return; }
+    if (newVal !== confVal) { msg.style.display='block'; msg.innerText='Konfirmasi kata sandi tidak cocok.'; return; }
+
+    userData.password = newVal;
+    try {
+        localStorage.setItem(key, JSON.stringify(userData));
+        msg.style.color = '#166534'; msg.style.display='block'; msg.innerText='Kata sandi berhasil diubah.';
+        setTimeout(() => { if (msg) msg.style.display='none'; }, 2500);
+        clearProfileInputs();
+    } catch (e) {
+        msg.style.display='block'; msg.innerText='Gagal menyimpan kata sandi.';
+    }
 }
 
 // render daftar chats yang tersimpan untuk user saat ini
